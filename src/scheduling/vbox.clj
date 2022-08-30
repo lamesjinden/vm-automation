@@ -223,7 +223,7 @@
         current-snapshot (get-current-snapshot vm-name snapshots)
         parent-snapshot (get-parent-snapshot current-snapshot snapshots)]
     (cond
-      (nil? parent-snapshot) (throw (ex-info "no parent snapshot to restore" {}))
+      (nil? parent-snapshot) nil
 
       (and
        (.endsWith (:name current-snapshot) snapshot-off-suffix)

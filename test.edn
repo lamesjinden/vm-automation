@@ -1,6 +1,5 @@
-[{:name "vm1"
-  :start-type :gui
-  :schedule {:shutdown-window {:start-time "00:12:00" :duration "PT8H"}}}
- {:name "vm2"
-  :start-type :separate
-  :schedule {:shutdown-window {:start-time "00:00:00" :duration "PT8H"}}}]
+{:config-version 1.0
+ :virtual-machines [{:name "vm1"
+                     :start-type :gui}
+                    {:name "vm2"
+                     :start-type :separate}]}

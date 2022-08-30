@@ -1,7 +1,6 @@
 (ns scheduling.shutdown
   (:require [clojure.edn :as edn]
-            [scheduling.vbox :as vbox]
-            [scheduling.timing :as timing]))
+            [scheduling.vbox :as vbox]))
 
 (defn fancy-shutdown [{vm-name :name}]
   (vbox/delete-recent-off-snapshot! vm-name)
@@ -10,12 +9,11 @@
   (vbox/stop-machine-wait! vm-name))
 
 (defn -main [& args]
-  (println "shutdown.clj")
   (let [config-file (or (first args) "config.edn")
         config (-> config-file
                    (slurp)
                    (edn/read-string))]
-    (->> config
-         (filter #(vbox/running? (vbox/machine-state (:name %))))
-         (filter #(timing/should-run? (get-in % [:schedule :shutdown-window])))
+    (->> (get-in config [:virtual-machines])
+         (map #(assoc % :state (vbox/machine-state (:name %))))
+         (filter #(vbox/running? (:state %)))
          (run! fancy-shutdown))))

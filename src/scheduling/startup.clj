@@ -1,10 +1,8 @@
 (ns scheduling.startup
-  (:require [clojure.edn :as edn] 
-            [scheduling.vbox :as vbox]
-            [scheduling.timing :as timing]))
+  (:require [clojure.edn :as edn]
+            [scheduling.vbox :as vbox]))
 
-(defn fancy-startup [{vm-name :name
-                      start-type :start-type}]
+(defn fancy-startup [{vm-name :name start-type :start-type}]
   (vbox/delete-recent-shutdown-snapshot! vm-name)
   (vbox/take-snapshot! vm-name vbox/snapshot-off-suffix)
   (vbox/restore-running-snapshot! vm-name)
@@ -15,8 +13,7 @@
         config (-> config-file
                    (slurp)
                    (edn/read-string))]
-    (->> config
+    (->> (get-in config [:virtual-machines])
          (map #(assoc % :state (vbox/machine-state (:name %))))
          (filter #(vbox/shutdown? (:state %)))
-         (filter #(timing/should-run? (get-in % [:schedule :startup-window])))
          (run! fancy-startup))))
