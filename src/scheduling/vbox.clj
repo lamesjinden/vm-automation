@@ -2,7 +2,8 @@
   (:require [clojure.core.async :as async]
             [clojure.java.shell :refer [sh]]
             [clojure.string :as str]
-            [clojure.spec.alpha :as s])
+            [clojure.spec.alpha :as s]
+            [babashka.process :as p])
   (:import (clojure.lang PersistentQueue)))
 
 (s/def ::exit int?)
@@ -20,23 +21,6 @@
 
 (def snapshot-off-suffix "off")
 
-(defn- splitter
-  "splits s on spaces, respecting runs of characters within s enclosed by single quotes."
-  [s]
-  (lazy-seq
-   (when-let [c (first s)]
-     (cond
-       (Character/isSpace c)
-       (splitter (rest s))
-       (= \' c)
-       (let [[w* r*] (split-with #(not= \' %) (rest s))]
-         (if (= \' (first r*))
-           (cons (apply str w*) (splitter (rest r*)))
-           (cons (apply str w*) nil)))
-       :else
-       (let [[w r] (split-with #(not (Character/isSpace %)) s)]
-         (cons (apply str w) (splitter r)))))))
-
 (s/fdef run
   :args string?
   :ret ::sh-result)
@@ -44,7 +28,7 @@
 (defn- run [command]
   (println (format "$> %s" command))
   (as-> command $
-    (splitter $)
+    (p/tokenize $)
     (apply sh $)))
 
 (s/fdef run-throw
@@ -176,6 +160,7 @@
         (->> snapshots
              (some #(and (= implied-parent-node (:node %)) %)))))))
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn snapshot-lineage
   "returns a lazy seq of snapshot descriptors representing snapshot lineage.
    the returned seq starts from starting-snapshot and is followed by the 
@@ -385,6 +370,4 @@
   (require '[clojure.spec.test.alpha :as stest])
   (stest/instrument `run-throw)
   (stest/unstrument `run-throw)
-  (stest/instrument `start-machine!)
-  
-  )
+  (stest/instrument `start-machine!))
