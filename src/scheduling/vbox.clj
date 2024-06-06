@@ -109,7 +109,8 @@
 (defn- process-snapshots-success-result [result]
   (let [lines (->> (:out result)
                    (str/split-lines)
-                   (map parse-property-line))]
+                   (map parse-property-line)
+                   (filter boolean))]
     (loop [queue (into PersistentQueue/EMPTY lines)
            acc []]
       (if (empty? queue)

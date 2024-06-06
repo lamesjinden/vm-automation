@@ -6,7 +6,7 @@
   (vbox/delete-recent-off-snapshot! vm-name)
   (vbox/delete-recent-running-snapshot! vm-name)
   (vbox/take-snapshot! vm-name vbox/snapshot-on-suffix)
-  (vbox/stop-machine-wait! vm-name))
+  (vbox/stop-machine-wait! vm-name 120))
 
 (defn -main [& args]
   (let [config-file (or (first args) "config.edn")
