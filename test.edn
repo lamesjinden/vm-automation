@@ -1,5 +1,0 @@
-{:config-version 1.0
- :virtual-machines [{:name "vm1"
-                     :start-type :gui}
-                    {:name "vm2"
-                     :start-type :separate}]}
