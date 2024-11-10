@@ -344,30 +344,51 @@
     (->> vms
          (filter #(running? (machine-state (:name %)))))))
 
+(defn get-running-vm-type
+  "returns the type of the running vm as nil when unknown or unmappable; otherwise :gui, :headless, :separate"
+  [vm-name]
+  (let [vminfo-result (run (format "vboxmanage showvminfo --machinereadable %s", vm-name))]
+    (when-let [sessionNameLine (->> (:out vminfo-result)
+                                    (str/split-lines)
+                                    (filter #(.startsWith % "SessionName"))
+                                    (first))]
+      (let [[_ type] (str/split sessionNameLine #"=")]
+        (cond
+          (str/starts-with? type "\"GUI")
+          :gui
+
+          (= type "\"headless\"")
+          :headless
+
+          :else
+          nil)))))
+
 (comment
+
+  (get-running-vm-type "Dev")
 
   (get-all-vms)
   (get-all-running-vms)
 
-  (machine-state "vm1")
-  (running? (machine-state "vm1"))
-  (start-machine! "vm1")
-  (start-machine! "vm1" :gui)
-  (stop-machine! "vm1")
-  (stop-machine-wait! "vm1")
+  (machine-state " vm1 ")
+  (running? (machine-state " vm1 "))
+  (start-machine! " vm1 ")
+  (start-machine! " vm1 " :gui)
+  (stop-machine! " vm1 ")
+  (stop-machine-wait! " vm1 ")
 
-  (machine-state "vm2")
-  (start-machine! "vm2" "gui")
-  (stop-machine! "vm2")
-  (stop-machine-wait! "vm2")
+  (machine-state " vm2 ")
+  (start-machine! " vm2 " " gui ")
+  (stop-machine! " vm2 ")
+  (stop-machine-wait! " vm2 ")
 
-  (get-current-snapshot "vm1")
-  (get-current-snapshot "vm2")
+  (get-current-snapshot " vm1 ")
+  (get-current-snapshot " vm2 ")
 
-  (s/valid? ::snapshot (get-current-snapshot "vm1"))
-  (s/explain ::snapshot (get-current-snapshot "vm1"))
+  (s/valid? ::snapshot (get-current-snapshot " vm1 "))
+  (s/explain ::snapshot (get-current-snapshot " vm1 "))
 
-  (run-throw "false")
+  (run-throw " false ")
   (require '[clojure.spec.test.alpha :as stest])
   (stest/instrument `run-throw)
   (stest/unstrument `run-throw)
